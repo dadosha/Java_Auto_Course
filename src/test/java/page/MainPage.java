@@ -26,5 +26,7 @@ public class MainPage {
         headingCard.shouldBe(Condition.visible).shouldHave(Condition.text("Кредит по данным карты"));
     }
 
-
+    public void fillNumberCard(String numberCard) {
+        cardNumberField.setValue(numberCard);
+    }
 }
