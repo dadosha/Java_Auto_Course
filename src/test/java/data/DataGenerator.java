@@ -84,4 +84,22 @@ public class DataGenerator {
             return new Card(generateCreditCardNumber());
         }
     }
+
+    @Value
+    public static class CardData {
+        String number;
+        String month;
+        String year;
+        String holder;
+        String cvc;
+    }
+
+    public static class CardDataInfo {
+        private CardDataInfo() {
+        }
+
+        public static CardData createCardData(String cardNumber, String month, String year, String owner, String CVV) {
+            return new CardData(cardNumber, month, year, owner, CVV);
+        }
+    }
 }
