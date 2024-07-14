@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "8.2.2"
+    id 'io.qameta.allure' version '2.11.2'
 }
 
 group = 'java.netology.course'
@@ -9,6 +10,14 @@ version = '1.0-SNAPSHOT'
 sourceCompatibility = 11
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
+
+allure {
+    version = '2.27.0'
+
+    useJUnit5 {
+        version = '2.27.0'
+    }
+}
 
 repositories {
     mavenCentral()
@@ -20,6 +29,8 @@ dependencies {
     testImplementation 'com.github.javafaker:javafaker:1.0.2'
     testImplementation 'com.mysql:mysql-connector-j:8.4.0'
     testImplementation 'commons-dbutils:commons-dbutils:1.8.1'
+    implementation 'io.qameta.allure:allure-selenide:2.27.0'
+    testImplementation 'io.qameta.allure:allure-junit5:2.27.0'
 }
 
 tasks.test {
