@@ -9,6 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import page.MainPage;
 
+import java.util.List;
+
 import static com.codeborne.selenide.Selenide.open;
 import static data.DataGenerator.CardInfo.*;
 import static data.DataGenerator.CardInfo.getApprovedCard;
@@ -49,12 +51,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @Test
@@ -72,12 +72,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendIncorrectForm();
 
-        assert "DECLINED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("DECLINED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @Test
@@ -114,7 +112,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatCard();
+        mainPage.sendIncorrectCard("Неверный формат");
     }
 
     @Test
@@ -129,7 +127,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendEmptyCard();
+        mainPage.sendIncorrectCard("Поле обязательно для заполнения");
     }
 
     @ParameterizedTest
@@ -152,12 +150,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @ParameterizedTest
@@ -177,7 +173,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectMonth();
+        mainPage.sendIncorrectMonth("Неверно указан срок действия карты");
     }
 
     @ParameterizedTest
@@ -197,7 +193,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatMonth();
+        mainPage.sendIncorrectMonth("Неверный формат");
     }
 
     @Test
@@ -211,7 +207,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendEmptyMonth();
+        mainPage.sendIncorrectMonth("Поле обязательно для заполнения");
     }
 
     @Test
@@ -229,26 +225,18 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @Test
     @DisplayName("Last month")
     void sendFormWithLastMonthYear() {
-        var cardYear = DataGenerator.getNowYear();
-        var cardMonth = DataGenerator.getNowMonth();
-        if (cardMonth == 1) {
-            cardMonth = 12;
-            cardYear -= 1;
-        }
-        else {
-            cardMonth -= 1;
-        }
+        List<Integer> date = DataGenerator.checkLastMonth(DataGenerator.getNowMonth(), DataGenerator.getNowYear());
+        var cardYear = date.get(1);
+        var cardMonth = date.get(0);
         var ownerCard = DataGenerator.generateCreditCardOwner();
         var cvvCard = DataGenerator.generateCreditCardCVV();
 
@@ -257,21 +245,15 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectMonth();
+        mainPage.sendIncorrectMonth("Неверно указан срок действия карты");
     }
 
     @Test
     @DisplayName("Next month")
     void sendFormWithNextMonthYear() {
-        var cardYear = DataGenerator.getNowYear();
-        var cardMonth = DataGenerator.getNowMonth();
-        if (cardMonth == 12) {
-            cardMonth = 1;
-            cardYear += 1;
-        }
-        else {
-            cardMonth += 1;
-        }
+        List<Integer> date = DataGenerator.checkNextMonth(DataGenerator.getNowMonth(), DataGenerator.getNowYear());
+        var cardYear = date.get(1);
+        var cardMonth = date.get(0);
         var ownerCard = DataGenerator.generateCreditCardOwner();
         var cvvCard = DataGenerator.generateCreditCardCVV();
 
@@ -282,12 +264,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @ParameterizedTest
@@ -310,12 +290,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @Test
@@ -331,7 +309,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectPastYear();
+        mainPage.sendIncorrectYear("Истёк срок действия карты");
     }
 
     @Test
@@ -346,7 +324,7 @@ public class CreditCardTest {
         mainPage.fillYearCard("00");
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectPastYear();
+        mainPage.sendIncorrectYear("Истёк срок действия карты");
     }
 
     @Test
@@ -362,7 +340,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFutureYear();
+        mainPage.sendIncorrectYear("Неверно указан срок действия карты");
     }
 
     @Test
@@ -377,7 +355,7 @@ public class CreditCardTest {
         mainPage.fillYearCard("99");
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFutureYear();
+        mainPage.sendIncorrectYear("Неверно указан срок действия карты");
     }
 
     @ParameterizedTest
@@ -397,7 +375,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(year);
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatYear();
+        mainPage.sendIncorrectYear("Неверный формат");
     }
 
     @Test
@@ -411,7 +389,7 @@ public class CreditCardTest {
         mainPage.fillMonthCard(DataGenerator.getFormatMonth(cardMonth));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendEmptyYear();
+        mainPage.sendIncorrectYear("Поле обязательно для заполнения");
     }
 
     @Test
@@ -425,7 +403,7 @@ public class CreditCardTest {
         mainPage.fillMonthCard(DataGenerator.getFormatMonth(cardMonth));
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendEmptyOwner();
+        mainPage.sendIncorrectOwner("Поле обязательно для заполнения");
     }
 
     @Test
@@ -444,12 +422,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @ParameterizedTest
@@ -471,12 +447,10 @@ public class CreditCardTest {
         mainPage.fillCVVCard(cvvCard);
         mainPage.sendCorrectForm();
 
-        assert "APPROVED".equals(SQLHelper.getStatusCreditPayment());
-        if (getCreditId() == null || getBankId() == null) {
-            throw new AssertionError
-                ("One of the IDs is null: bankId=" + getBankId() + ", creditId=" + getCreditId());
-        }
-        assert getBankId().equals(getCreditId());
+        Assertions.assertEquals("APPROVED", SQLHelper.getStatusCreditPayment());
+        Assertions.assertNotNull(getCreditId());
+        Assertions.assertNotNull(getBankId());
+        Assertions.assertEquals(getBankId(), SQLHelper.getCreditId());
     }
 
     @ParameterizedTest
@@ -497,7 +471,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatOwner();
+        mainPage.sendIncorrectOwner("Неверный формат");
     }
 
     @ParameterizedTest
@@ -516,7 +490,7 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatCVV();
+        mainPage.sendIncorrectCVV("Неверный формат");
     }
 
     @Test
@@ -530,7 +504,7 @@ public class CreditCardTest {
         mainPage.fillMonthCard(DataGenerator.getFormatMonth(cardMonth));
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
-        mainPage.sendEmptyCVV();
+        mainPage.sendIncorrectCVV("Поле обязательно для заполнения");
     }
 
     @Test
@@ -546,8 +520,8 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatCard();
-        mainPage.refillNumberCard(getApprovedCard().getNumber());
+        mainPage.sendIncorrectCard("Неверный формат");
+        mainPage.fillNumberCard(getApprovedCard().getNumber());
         mainPage.sendHiddenCardFieldError();
     }
 
@@ -564,8 +538,8 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectMonth();
-        mainPage.refillMonth(DataGenerator.getFormatMonth(cardMonth));
+        mainPage.sendIncorrectMonth("Неверно указан срок действия карты");
+        mainPage.fillMonthCard(DataGenerator.getFormatMonth(cardMonth));
         mainPage.sendHiddenMonthError();
     }
 
@@ -582,8 +556,8 @@ public class CreditCardTest {
         mainPage.fillYearCard("1");
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendIncorrectFormatYear();
-        mainPage.refillYear(DataGenerator.getFormatYear(cardYear));
+        mainPage.sendIncorrectYear("Неверный формат");
+        mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.sendHiddenYearError();
     }
 
@@ -600,8 +574,8 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard("");
         mainPage.fillCVVCard(cvvCard);
-        mainPage.sendEmptyOwner();
-        mainPage.refillOwner(ownerCard);
+        mainPage.sendIncorrectOwner("Поле обязательно для заполнения");
+        mainPage.fillOwnerCard(ownerCard);
         mainPage.sendHiddenOwnerError();
     }
 
@@ -618,8 +592,8 @@ public class CreditCardTest {
         mainPage.fillYearCard(DataGenerator.getFormatYear(cardYear));
         mainPage.fillOwnerCard(ownerCard);
         mainPage.fillCVVCard("1");
-        mainPage.sendIncorrectFormatCVV();
-        mainPage.refillCVV(cvvCard);
+        mainPage.sendIncorrectCVV("Неверный формат");
+        mainPage.fillCVVCard(cvvCard);
         mainPage.sendHiddenCVVError();
     }
 }

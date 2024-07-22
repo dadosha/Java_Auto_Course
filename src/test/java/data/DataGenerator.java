@@ -6,6 +6,7 @@ import lombok.Value;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -63,6 +64,28 @@ public class DataGenerator {
 
     public static String getFormatYear(int year) {
         return Integer.toString(year % 100);
+    }
+
+    public static List<Integer> checkNextMonth(int month, int year) {
+        if (month == 12) {
+            month = 1;
+            year += 1;
+        }
+        else {
+            month += 1;
+        }
+        return List.of(month, year);
+    }
+
+    public static List<Integer> checkLastMonth(int month, int year) {
+        if (month == 1) {
+            month = 12;
+            year -= 1;
+        }
+        else {
+            month -= 1;
+        }
+        return List.of(month, year);
     }
 
     @Value

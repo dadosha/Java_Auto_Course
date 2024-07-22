@@ -36,4 +36,23 @@ public class RequestsHelper {
 
         return jsonResponse.get("status").getAsString();
     }
+
+    public static String sendnInorrectDebitCardPay(String cardNumber, String month, String year
+        , String owner, String CVV, int statusCode, String field) {
+        Response response = given()
+            .spec(requestSpec)
+            .body(DataGenerator.CardDataInfo.createCardData(cardNumber, month, year, owner, CVV))
+            .when()
+            .post("/api/v1/pay")
+            .then()
+            .statusCode(statusCode)
+            .extract()
+            .response();
+
+        String responseBody = response.getBody().asString();
+        Gson gson = new Gson();
+        JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
+
+        return jsonResponse.get(field).getAsString();
+    }
 }
