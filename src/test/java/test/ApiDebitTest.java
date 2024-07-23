@@ -86,9 +86,9 @@ public class ApiDebitTest {
             ownerCard,
             cvvCard,
             400,
-            "message");
+            "error");
 
-        Assertions.assertEquals("400 Bad Request", field);
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @ParameterizedTest
@@ -127,15 +127,15 @@ public class ApiDebitTest {
         var ownerCard = DataGenerator.generateCreditCardOwner();
         var cvvCard = DataGenerator.generateCreditCardCVV();
 
-        String status = RequestsHelper.sendCorrectDebitCardPay(getApprovedCard().getNumber(),
+        String field = RequestsHelper.sendnInorrectDebitCardPay(getApprovedCard().getNumber(),
             month,
             DataGenerator.getFormatYear(cardYear),
             ownerCard,
-            cvvCard);
+            cvvCard,
+            400,
+            "error");
 
-        Assertions.assertEquals("DECLINED", status);
-        Assertions.assertEquals("DECLINED", SQLHelper.getStatusPayment());
-        Assertions.assertEquals(getPaymentId(), SQLHelper.getPaymentTransaction());
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @ParameterizedTest
@@ -159,9 +159,9 @@ public class ApiDebitTest {
             ownerCard,
             cvvCard,
             400,
-            "message");
+            "error");
 
-        Assertions.assertEquals("400 Bad Request", field);
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @Test
@@ -181,6 +181,28 @@ public class ApiDebitTest {
         Assertions.assertEquals("APPROVED", status);
         Assertions.assertEquals("APPROVED", SQLHelper.getStatusPayment());
         Assertions.assertEquals(getPaymentId(), SQLHelper.getPaymentTransaction());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "asdad",
+        "!@#$"
+    })
+    @DisplayName("Send incorrect month - text")
+    void shouldIncorrectMothFormatText(String month) {
+        var cardYear = DataGenerator.getYear() + 1;
+        var ownerCard = DataGenerator.generateCreditCardOwner();
+        var cvvCard = DataGenerator.generateCreditCardCVV();
+
+        String field = RequestsHelper.sendnInorrectDebitCardPay(getApprovedCard().getNumber(),
+            month,
+            DataGenerator.getFormatYear(cardYear),
+            ownerCard,
+            cvvCard,
+            400,
+            "error");
+
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @Test
@@ -342,9 +364,31 @@ public class ApiDebitTest {
             ownerCard,
             cvvCard,
             400,
-            "message");
+            "error");
 
-        Assertions.assertEquals("400 Bad Request", field);
+        Assertions.assertEquals("Bad Request", field);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "ads",
+        "!@#%"
+    })
+    @DisplayName("Year - text")
+    void negativeYearText(String year) {
+        var cardMonth = DataGenerator.getMonth(DataGenerator.getNowYear() + 1);
+        var ownerCard = DataGenerator.generateCreditCardOwner();
+        var cvvCard = DataGenerator.generateCreditCardCVV();
+
+        String field = RequestsHelper.sendnInorrectDebitCardPay(getApprovedCard().getNumber(),
+            DataGenerator.getFormatMonth(cardMonth),
+            year,
+            ownerCard,
+            cvvCard,
+            400,
+            "error");
+
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @Test
@@ -409,9 +453,9 @@ public class ApiDebitTest {
             ownerCard,
             cvvCard,
             400,
-            "message");
+            "error");
 
-        Assertions.assertEquals("400 Bad Request", field);
+        Assertions.assertEquals("Bad Request", field);
     }
 
     @ParameterizedTest
@@ -432,8 +476,30 @@ public class ApiDebitTest {
             ownerCard,
             cvvCard,
             400,
-            "message");
+            "error");
 
-        Assertions.assertEquals("400 Bad Request", field);
+        Assertions.assertEquals("Bad Request", field);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "dsfaasdf",
+        "!@#$"
+    })
+    @DisplayName("Incorrect CVV input - text")
+    void cvvIncorrectInputText(String cvvCard) {
+        var cardYear = DataGenerator.getYear();
+        var cardMonth = DataGenerator.getMonth(cardYear);
+        var ownerCard = DataGenerator.generateCreditCardOwner();
+
+        String field = RequestsHelper.sendnInorrectDebitCardPay(getApprovedCard().getNumber(),
+            DataGenerator.getFormatMonth(cardMonth),
+            DataGenerator.getFormatYear(cardYear),
+            ownerCard,
+            cvvCard,
+            400,
+            "error");
+
+        Assertions.assertEquals("Bad Request", field);
     }
 }
